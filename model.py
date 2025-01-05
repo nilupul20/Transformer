@@ -1,9 +1,7 @@
 import torch.nn as nn
 from transformer.Transformer import Transformer
 
-def build_model(cfg: dict) -> Transformer:
-        src_vocab_size = cfg['src_vocab_size']
-        tgt_vocab_size = cfg['tgt_vocab_size']
+def build_model(cfg: dict, src_vocab_size:int, tgt_vocab_size:int) -> Transformer:
 
         src_seq_len = cfg['src_seq_len']
         tgt_seq_len = cfg['tgt_seq_len']

@@ -19,6 +19,7 @@ class Transformer(nn.Module):
             h: int,
             dropout: float
         ):
+        super().__init__()
 
         self.src_embed = InputEmbeddings(d_model, src_vocab_size)
         self.tgt_embed = InputEmbeddings(d_model, tgt_vocab_size)
@@ -36,13 +37,10 @@ class Transformer(nn.Module):
         src = self.src_pe(src)
         return self.encoder(src, src_mask)
     
-    def decode(self, encoder_output, src_mask, tgt_mask):
+    def decode(self, encoder_output, src_mask, tgt, tgt_mask):
         tgt = self.tgt_embed(tgt)
         tgt = self.tgt_pe(tgt)
         return self.decoder(tgt, encoder_output, src_mask, tgt_mask)
     
     def project(self, x):
         return self.projection_layer(x)
-
-    def forward(self, x, mask):
-        pass
