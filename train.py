@@ -4,18 +4,25 @@ from torch.utils.tensorboard import SummaryWriter
 from pathlib import Path
 from tqdm import tqdm
 
+from helpers import get_logger
 from dataset import get_dataset
 from model import build_model
 from config import get_config, get_weights_file_path
 
 def train(cfg:dict):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"device: {device}")
-
     Path(cfg['model_folder']).mkdir(parents=True, exist_ok=True)
+    logger = get_logger(cfg['model_folder'], "train.log")
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    logger.info(f"device: {device}")
 
     train_dataloader, val_dataloader, tokenizer_src, tokenizer_tgt = get_dataset(cfg)
+    logger.info(f"Train dataset size: {len(train_dataloader.dataset)}")
+    logger.info(f"Validation dataset size: {len(val_dataloader.dataset)}")
+
+
     model = build_model(cfg, tokenizer_src.get_vocab_size(), tokenizer_tgt.get_vocab_size()).to(device)
+    logger.info(f"Initialized the model:\n{model}")
 
     writer = SummaryWriter(cfg['experiment_name'])
 
@@ -25,19 +32,22 @@ def train(cfg:dict):
     global_step = 0
     if cfg['preload']:
         model_file_name = get_weights_file_path(cfg, cfg['preload'])
-        print(f"Preloading model {model_file_name}")
+        logger.info(f"Preloading model {model_file_name}")
         state = torch.load(model_file_name)
         initial_epoch = state['epoch'] + 1
         optimizer.load_state_dict(state['optimizer_state_dict'])
         global_step = state['global_step']
+    else:
+        logger.info("Model will train from scratch.")
 
     loss_fn = nn.CrossEntropyLoss(ignore_index=tokenizer_src.token_to_id('[PAD]'), label_smoothing=0.1).to(device)
 
+    logger.info("Training Starts...")
     for epoch in range(initial_epoch, cfg['num_epoches']):
         torch.cuda.empty_cache()
         model.train()
 
-        batch_iterator = tqdm(train_dataloader, desc=f"Epoch: {epoch:03d}")
+        batch_iterator = tqdm(train_dataloader, desc=f"Epoch: {epoch:03d}/{cfg['num_epoches']:03d}")
         for batch in batch_iterator:
             encoder_input = batch['encoder_input'].to(device) # (batch_size, seq_len)
             decoder_input = batch['decoder_input'].to(device) # (batch_size, seq_len)
@@ -60,6 +70,8 @@ def train(cfg:dict):
             optimizer.zero_grad(set_to_none=True)
 
             global_step += 1
+        
+        logger.info("Training Completed")
 
 
 if __name__ == '__main__':
