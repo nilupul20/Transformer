@@ -1,5 +1,6 @@
 import yaml
 from dataclasses import dataclass
+from pathlib import Path
 
 @dataclass
 class TransformerConfig:
@@ -30,3 +31,8 @@ class TransformerConfig:
         with open(file_path, 'r') as file:
             data = yaml.safe_load(file)
         return TransformerConfig(**data)
+    
+    def save_to_yaml(self, directory: str):
+        file_path = str(Path(directory, 'config.yaml'))
+        with open(file_path, 'w') as file:
+            yaml.dump(self.__dict__, file, default_flow_style=False)

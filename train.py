@@ -117,6 +117,7 @@ def run_validation(
 def train(cfg:TransformerConfig):
     models_dir =  Path('runs', cfg.model_folder)
     models_dir.mkdir(parents=True, exist_ok=True)
+    cfg.save_to_yaml(str(models_dir))
     logger = get_logger(str(models_dir), "train.log")
 
     if cfg.use_cuda:
