@@ -37,3 +37,4 @@ def get_console_width():
     except:
         # If we can't get the console width, use 80 as default
         console_width = 80
+    return console_width
