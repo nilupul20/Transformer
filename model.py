@@ -1,27 +1,19 @@
 import torch.nn as nn
 from transformer.Transformer import Transformer
+from transformer_config import TransformerConfig
 
-def build_model(cfg: dict, src_vocab_size:int, tgt_vocab_size:int) -> Transformer:
-
-        src_seq_len = cfg['src_seq_len']
-        tgt_seq_len = cfg['tgt_seq_len']
-
-        d_model = cfg.get('d_model', 512)
-        num_layers = cfg.get('num_layers', 6)
-        d_ff = cfg.get('d_ff', 2048)
-        h = cfg.get('h', 8)
-        dropout = cfg.get('dropout', 0.1)
+def build_model(cfg: TransformerConfig, src_vocab_size:int, tgt_vocab_size:int) -> Transformer:
 
         transformer = Transformer(
             src_vocab_size,
             tgt_vocab_size,
-            src_seq_len,
-            tgt_seq_len,
-            d_model,
-            num_layers,
-            d_ff,
-            h,
-            dropout
+            cfg.src_seq_len,
+            cfg.tgt_seq_len,
+            cfg.d_model,
+            cfg.num_layers,
+            cfg.d_ff,
+            cfg.h,
+            cfg.dropout
         )
 
         # initialize parameters
